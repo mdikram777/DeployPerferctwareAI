@@ -159,11 +159,11 @@ def load_models():
         llm = None
     
     try:
-    embeddings = HuggingFaceEmbeddings(
-        model_name="sentence-transformers/all-MiniLM-L6-v2",
-        model_kwargs={"device": "cpu"},
-        encode_kwargs={"normalize_embeddings": False}
-    )
+        embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={"device": "cpu"},
+            encode_kwargs={"normalize_embeddings": False}
+        )
         print("✅ Embeddings model loaded successfully")
     except Exception as e:
         print(f"⚠️ Embeddings model unavailable: {str(e)}")
@@ -763,12 +763,12 @@ def main():
                     # User message on the right
                     col1, col2 = st.columns([1, 2])
                     with col2:
-                st.markdown(f"""
+                        st.markdown(f"""
                         <div style="background-color: #DCF8C6; padding: 15px; border-radius: 15px; margin: 10px 0; text-align: right; color: #000; border: 1px solid #B8E6B8;">
                             <strong style="color: #2E7D32;">You</strong><br>
                             <div style="color: #000; margin-top: 5px;">{message['content']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                        </div>
+                        """, unsafe_allow_html=True)
                 else:
                     # AI message on the left - UNIFIED MESSAGE WITH IMAGES
                     col1, col2 = st.columns([2, 1])
@@ -841,12 +841,12 @@ def main():
             # Welcome message
             col1, col2 = st.columns([2, 1])
             with col1:
-    st.markdown("""
+                st.markdown("""
                 <div style="background-color: #F5F5F5; padding: 15px; border-radius: 15px; margin: 10px 0; color: #000; border: 1px solid #E0E0E0; max-width: 100%; overflow: hidden;">
                     <strong style="color: #1976D2;">Perfectware AI</strong><br>
                     <div style="color: #000; margin-top: 5px; word-wrap: break-word;">👋 Hello! I'm your Perfectware AI assistant. I'm here to help you find the perfect tiles for your project. What are you looking for today?</div>
-        </div>
-    """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True)
     
     # Input field positioned below chat messages (like messaging app)
     st.markdown("---")
@@ -897,30 +897,30 @@ def main():
                 # Generate AI response
                 if qa_chain is not None:
                     try:
-                # Prepare context with image captions
-                context = []
-                image_contexts = []
-                for doc in docs:
-                    context.append(doc.page_content)
-                    # Add image context to prompt
-                    if "image_caption" in doc.metadata:
-                        image_contexts.append(doc.metadata['image_caption'])
-                
+                        # Prepare context with image captions
+                        context = []
+                        image_contexts = []
+                        for doc in docs:
+                            context.append(doc.page_content)
+                            # Add image context to prompt
+                            if "image_caption" in doc.metadata:
+                                image_contexts.append(doc.metadata['image_caption'])
+                        
                         # Get conversation context for the prompt
                         conversation_context = get_conversation_context(st.session_state.chat_history)
-                
-                # Generate response
+                        
+                        # Generate response
                         response = qa_chain.invoke({
-                    "context": "\n\n".join(context),
-                    "question": query,
-                    "company_name": COMPANY_INFO['name'],
-                    "tagline": COMPANY_INFO['tagline'],
-                    "established": COMPANY_INFO['established'],
-                    "experience": COMPANY_INFO['experience'],
-                    "location": COMPANY_INFO['location'],
-                    "specialties": ", ".join(COMPANY_INFO['specialties']),
-                    "customers": ", ".join(COMPANY_INFO['target_customers']),
-                    "values": ", ".join(COMPANY_INFO['values']),
+                            "context": "\n\n".join(context),
+                            "question": query,
+                            "company_name": COMPANY_INFO['name'],
+                            "tagline": COMPANY_INFO['tagline'],
+                            "established": COMPANY_INFO['established'],
+                            "experience": COMPANY_INFO['experience'],
+                            "location": COMPANY_INFO['location'],
+                            "specialties": ", ".join(COMPANY_INFO['specialties']),
+                            "customers": ", ".join(COMPANY_INFO['target_customers']),
+                            "values": ", ".join(COMPANY_INFO['values']),
                             "image_context": " | ".join(image_contexts[:3]),  # Limit to top 3
                             "history": conversation_context  # Add conversation history to prompt
                         })
@@ -1099,7 +1099,7 @@ def main():
     
     query = ""
     
-        with col1:
+    with col1:
         if st.button("🏠 Bathroom wall tiles", key="prompt1"):
             st.session_state.query_input = "bathroom wall tiles"
             st.rerun()
@@ -1110,7 +1110,7 @@ def main():
             st.session_state.query_input = "decorative tiles"
             st.rerun()
     
-        with col2:
+    with col2:
         if st.button("🏢 Commercial tiles", key="prompt4"):
             st.session_state.query_input = "commercial tiles"
             st.rerun()
