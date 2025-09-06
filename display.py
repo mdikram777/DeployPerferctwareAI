@@ -933,12 +933,12 @@ def main():
                     # User message on the right
                     col1, col2 = st.columns([1, 2])
                     with col2:
-                st.markdown(f"""
+                        st.markdown(f"""
                         <div style="background-color: #DCF8C6; padding: 15px; border-radius: 15px; margin: 10px 0; text-align: right; color: #000; border: 1px solid #B8E6B8;">
                             <strong style="color: #2E7D32;">You</strong><br>
                             <div style="color: #000; margin-top: 5px;">{message['content']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                        </div>
+                        """, unsafe_allow_html=True)
                 else:
                     # AI message on the left - UNIFIED MESSAGE WITH IMAGES
                     col1, col2 = st.columns([2, 1])
