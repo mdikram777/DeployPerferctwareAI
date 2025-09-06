@@ -50,10 +50,155 @@ def get_conversation_context(history: list) -> str:
     
     return context
 
-def enhanced_product_search(query: str, vs, k: int = 10, history: list = None) -> list:
-    """Enhanced product search with history context and better ranking"""
-    if not vs or embeddings is None:
+def fallback_product_search(query: str, k: int = 10) -> list:
+    """Fallback product search using product data from extracted_content"""
+    try:
+        # Load product data from the extracted content
+        import json
+        import os
+        from langchain.schema import Document
+        
+        # Try to load from product_list.json first
+        if os.path.exists("product_list.json"):
+            with open("product_list.json", "r", encoding="utf-8") as f:
+                products = json.load(f)
+        else:
+            # Create comprehensive product data based on your extracted catalog
+            products = [
+                {
+                    "name": "Rainbo Grey",
+                    "description": "Rainbo Grey fuses mixed stone effects with soft hues for an urban yet inviting look. Perfect for modern living spaces.",
+                    "size": "600x1200mm",
+                    "features": ["Polish/Matt", "Stain Resistant", "Water Resistant", "Easy to Maintain"],
+                    "applications": ["Living Room", "Bedroom", "Commercial Spaces"],
+                    "image_path": "extracted_content/final/figure-1-1.jpg"
+                },
+                {
+                    "name": "Gemstone Azul",
+                    "description": "The Gemstone Azul tiles are inspired by natural gemstones with elegant hues and intricate detailing. Perfect for luxury spaces.",
+                    "size": "600x1200mm", 
+                    "features": ["High Gloss", "Scratch Resistant", "Stain Resistant", "Easy to Clean"],
+                    "applications": ["Bathroom", "Kitchen", "Commercial"],
+                    "image_path": "extracted_content/final/figure-2-2.jpg"
+                },
+                {
+                    "name": "BON SANTORO NERO CR",
+                    "description": "Striking noir finish with carved texture achieves a bold aesthetic for modern and classic themes.",
+                    "size": "600x600mm",
+                    "features": ["Matt Finish", "Anti-Skid", "Frost Resistant", "High Flexural Strength"],
+                    "applications": ["Outdoor", "Commercial", "High Traffic Areas"],
+                    "image_path": "extracted_content/final/figure-3-3.jpg"
+                },
+                {
+                    "name": "Onyx Blue",
+                    "description": "Each tile features distinctive marble-inspired veining in unique colorways from cool blue to warm grey and lively green.",
+                    "size": "600x600mm",
+                    "features": ["Polished Finish", "Water Resistant", "Stain Resistant", "Easy Maintenance"],
+                    "applications": ["Living Room", "Bedroom", "Commercial"],
+                    "image_path": "extracted_content/final/figure-4-4.jpg"
+                },
+                {
+                    "name": "Onyx Ivory",
+                    "description": "Onyx Ivory captures the elegance of natural onyx in a delicate ivory palette, bringing brightness and sophistication.",
+                    "size": "600x600mm",
+                    "features": ["Polished Finish", "Water Resistant", "Stain Resistant", "Easy Maintenance"],
+                    "applications": ["Bathroom", "Kitchen", "Living Room"],
+                    "image_path": "extracted_content/final/figure-5-5.jpg"
+                },
+                {
+                    "name": "Lyno Grey",
+                    "description": "Lyno Grey offers subtle patterning on a neutral base, reflecting minimalism and contemporary taste.",
+                    "size": "600x1200mm",
+                    "features": ["Polish/Matt", "Stain Resistant", "Water Resistant", "Easy to Maintain"],
+                    "applications": ["Living Room", "Bedroom", "Commercial"],
+                    "image_path": "extracted_content/final/figure-6-6.jpg"
+                },
+                {
+                    "name": "FOLK ORIGIN",
+                    "description": "A heritage-inspired tile with diamond and star carpet motifs, Folk Origin brings cultural richness and timeless artistry.",
+                    "size": "198x198mm",
+                    "features": ["Matt Finish", "Scratch Resistant", "Water Resistant", "Easy to Clean"],
+                    "applications": ["Bathroom", "Kitchen", "Decorative"],
+                    "image_path": "extracted_content/final/figure-7-7.jpg"
+                },
+                {
+                    "name": "Crag Brown",
+                    "description": "Crag Brown is an Ultra Strong, Outdoor Vitrified Tile with a brown, irregular stone pattern. Designed for durability and aesthetic appeal.",
+                    "size": "400x400mm",
+                    "features": ["Anti-Skid", "Frost Resistance", "High Flexural Strength", "Fire Resistance"],
+                    "applications": ["Outdoor", "Commercial", "High Traffic Areas"],
+                    "image_path": "extracted_content/final/figure-8-8.jpg"
+                },
+                {
+                    "name": "NUEVA ONYX FP",
+                    "description": "Opulent Onyx design in soft greys and whites, Onyx FP creates luxury with rich surface clarity and polish finish.",
+                    "size": "600x600mm",
+                    "features": ["Full Polish Finish", "Water/Stain Resistant", "Easy to Clean", "Scratch Resistant"],
+                    "applications": ["Living Room", "Bedroom", "Commercial"],
+                    "image_path": "extracted_content/final/figure-9-9.jpg"
+                },
+                {
+                    "name": "Onyx Terquoise",
+                    "description": "Onyx Terquoise is inspired by turquoise onyx stone for a fresh, soothing, and luxurious vibe.",
+                    "size": "600x600mm",
+                    "features": ["Polished Finish", "Water Resistant", "Stain Resistant", "Easy Maintenance"],
+                    "applications": ["Bathroom", "Kitchen", "Living Room"],
+                    "image_path": "extracted_content/final/figure-10-10.jpg"
+                }
+            ]
+        
+        # Simple keyword matching
+        query_words = set(query.lower().split())
+        matched_products = []
+        
+        for product in products:
+            score = 0
+            product_text = f"{product.get('name', '')} {product.get('description', '')} {product.get('features', '')} {product.get('applications', '')}".lower()
+            
+            # Count word matches
+            for word in query_words:
+                if word in product_text:
+                    score += 1
+            
+            if score > 0:
+                # Create Document object for compatibility
+                doc = Document(
+                    page_content=f"{product['name']}: {product.get('description', '')}",
+                    metadata={
+                        "product_name": product['name'],
+                        "description": product.get('description', ''),
+                        "size": product.get('size', 'N/A'),
+                        "features": product.get('features', []),
+                        "applications": product.get('applications', []),
+                        "image_path": product.get('image_path', ''),
+                        "image_base64": get_image_base64(product.get('image_path', ''))
+                    }
+                )
+                matched_products.append((doc, score))
+        
+        # Sort by score and return top k
+        matched_products.sort(key=lambda x: x[1], reverse=True)
+        return [doc for doc, _ in matched_products[:k]]
+        
+    except Exception as e:
+        print(f"Fallback search error: {e}")
         return []
+
+def get_image_base64(image_path):
+    """Get base64 encoded image for display"""
+    try:
+        import base64
+        if os.path.exists(image_path):
+            with open(image_path, "rb") as img_file:
+                return base64.b64encode(img_file.read()).decode()
+    except:
+        pass
+    return None
+
+def enhanced_product_search(query: str, vs, k: int = 10, history: list = None) -> list:
+    """Enhanced product search using extracted content directly"""
+    # Always use fallback search since we want to work with extracted content
+    return fallback_product_search(query, k)
     
     try:
         # Get more results initially
@@ -132,37 +277,57 @@ def enhanced_product_search(query: str, vs, k: int = 10, history: list = None) -
         return []
 
 # Initialize models
-@st.cache_resource
+# Global variables for lazy loading
+_llm = None
+_embeddings = None
+
 def load_models():
+    """Load AI models with memory optimization for Render"""
+    global _llm, _embeddings
+    
+    # Return cached models if already loaded
+    if _llm is not None or _embeddings is not None:
+        return _llm, _embeddings
+    
     # Check if token exists
     token = os.getenv("HUGGINGFACEHUB_API_TOKEN")
     if not token:
         st.warning("HUGGINGFACEHUB_API_TOKEN not found in environment variables")
         return None, None
     
-    # Use Hugging Face Hub API (free tier available)
-    # Note: HuggingFace API may have connectivity issues, so we'll rely on fallback
+    # Memory optimization: Clear any existing models
+    import gc
+    gc.collect()
+    
+    # Use Hugging Face Hub API with memory optimization
     try:
         from langchain_huggingface import HuggingFaceEndpoint
         
-        llm = HuggingFaceEndpoint(
+        _llm = HuggingFaceEndpoint(
             repo_id="microsoft/DialoGPT-small",
             temperature=0.7,
-            huggingfacehub_api_token=token
+            huggingfacehub_api_token=token,
+            max_length=150,  # Limit response length to save memory
+            timeout=30  # Add timeout to prevent hanging
         )
-        # Test the model to ensure it works
-        test_response = llm.invoke("test")
-        print("✅ AI model is working")
+        print("✅ AI model loaded successfully")
     except Exception as e:
         print(f"⚠️ AI model unavailable: {str(e)}")
         print("🔄 Using fallback response system")
-        llm = None
+        _llm = None
     
     try:
-        embeddings = HuggingFaceEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": False}
+        # Use the same model that was used to create the FAISS index
+        _embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2",
+            model_kwargs={
+                "device": "cpu",
+                "trust_remote_code": True
+            },
+            encode_kwargs={
+                "normalize_embeddings": False,
+                "batch_size": 1  # Process one at a time to save memory
+            }
         )
         print("✅ Embeddings model loaded successfully")
     except Exception as e:
@@ -185,11 +350,14 @@ def load_models():
             def embed_documents(self, texts):
                 return [self.embed_query(text) for text in texts]
         
-        embeddings = FallbackEmbeddings()
+        _embeddings = FallbackEmbeddings()
     
-    return llm, embeddings
+    # Clear memory after loading
+    gc.collect()
+    return _llm, _embeddings
 
-llm, embeddings = load_models()
+# Initialize models lazily - don't load immediately
+llm, embeddings = None, None
 
 # Enhanced page configuration
 st.set_page_config(
@@ -715,17 +883,19 @@ def main():
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
     
-    # Initialize vector store
-    if 'vector_store' not in st.session_state:
-        try:
-            st.session_state.vector_store = load_vector_store()
-        except Exception as e:
-            st.error(f"Vector store unavailable: {str(e)}")
-            st.session_state.vector_store = None
-    
     # Initialize query_input if not exists
     if 'query_input' not in st.session_state:
         st.session_state.query_input = ""
+    
+    # Load models only when needed (lazy loading)
+    global llm, embeddings
+    if llm is None and embeddings is None:
+        llm, embeddings = load_models()
+    
+    # Initialize vector store (not needed - using direct product search)
+    if 'vector_store' not in st.session_state:
+        st.session_state.vector_store = None
+        print("✅ Using direct product search with extracted content")
     
     # Company header
     st.markdown(f"""
@@ -763,12 +933,12 @@ def main():
                     # User message on the right
                     col1, col2 = st.columns([1, 2])
                     with col2:
-                        st.markdown(f"""
+                st.markdown(f"""
                         <div style="background-color: #DCF8C6; padding: 15px; border-radius: 15px; margin: 10px 0; text-align: right; color: #000; border: 1px solid #B8E6B8;">
                             <strong style="color: #2E7D32;">You</strong><br>
                             <div style="color: #000; margin-top: 5px;">{message['content']}</div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                </div>
+                """, unsafe_allow_html=True)
                 else:
                     # AI message on the left - UNIFIED MESSAGE WITH IMAGES
                     col1, col2 = st.columns([2, 1])
@@ -841,12 +1011,12 @@ def main():
             # Welcome message
             col1, col2 = st.columns([2, 1])
             with col1:
-                st.markdown("""
+    st.markdown("""
                 <div style="background-color: #F5F5F5; padding: 15px; border-radius: 15px; margin: 10px 0; color: #000; border: 1px solid #E0E0E0; max-width: 100%; overflow: hidden;">
                     <strong style="color: #1976D2;">Perfectware AI</strong><br>
                     <div style="color: #000; margin-top: 5px; word-wrap: break-word;">👋 Hello! I'm your Perfectware AI assistant. I'm here to help you find the perfect tiles for your project. What are you looking for today?</div>
-                </div>
-                """, unsafe_allow_html=True)
+        </div>
+    """, unsafe_allow_html=True)
     
     # Input field positioned below chat messages (like messaging app)
     st.markdown("---")
@@ -882,10 +1052,6 @@ def main():
         with st.spinner("🔍 Searching our catalog and preparing recommendations..."):
             try:
                 # Check if vector store is available
-                if st.session_state.vector_store is None:
-                    st.error("Vector store not loaded. Please restart the application.")
-                    return
-                
                 # Perform enhanced search with history context
                 docs = enhanced_product_search(
                     query, 
@@ -897,30 +1063,30 @@ def main():
                 # Generate AI response
                 if qa_chain is not None:
                     try:
-                        # Prepare context with image captions
-                        context = []
-                        image_contexts = []
-                        for doc in docs:
-                            context.append(doc.page_content)
-                            # Add image context to prompt
-                            if "image_caption" in doc.metadata:
-                                image_contexts.append(doc.metadata['image_caption'])
-                        
+                # Prepare context with image captions
+                context = []
+                image_contexts = []
+                for doc in docs:
+                    context.append(doc.page_content)
+                    # Add image context to prompt
+                    if "image_caption" in doc.metadata:
+                        image_contexts.append(doc.metadata['image_caption'])
+                
                         # Get conversation context for the prompt
                         conversation_context = get_conversation_context(st.session_state.chat_history)
                         
-                        # Generate response
+                # Generate response
                         response = qa_chain.invoke({
-                            "context": "\n\n".join(context),
-                            "question": query,
-                            "company_name": COMPANY_INFO['name'],
-                            "tagline": COMPANY_INFO['tagline'],
-                            "established": COMPANY_INFO['established'],
-                            "experience": COMPANY_INFO['experience'],
-                            "location": COMPANY_INFO['location'],
-                            "specialties": ", ".join(COMPANY_INFO['specialties']),
-                            "customers": ", ".join(COMPANY_INFO['target_customers']),
-                            "values": ", ".join(COMPANY_INFO['values']),
+                    "context": "\n\n".join(context),
+                    "question": query,
+                    "company_name": COMPANY_INFO['name'],
+                    "tagline": COMPANY_INFO['tagline'],
+                    "established": COMPANY_INFO['established'],
+                    "experience": COMPANY_INFO['experience'],
+                    "location": COMPANY_INFO['location'],
+                    "specialties": ", ".join(COMPANY_INFO['specialties']),
+                    "customers": ", ".join(COMPANY_INFO['target_customers']),
+                    "values": ", ".join(COMPANY_INFO['values']),
                             "image_context": " | ".join(image_contexts[:3]),  # Limit to top 3
                             "history": conversation_context  # Add conversation history to prompt
                         })
@@ -1099,7 +1265,7 @@ def main():
     
     query = ""
     
-    with col1:
+        with col1:
         if st.button("🏠 Bathroom wall tiles", key="prompt1"):
             st.session_state.query_input = "bathroom wall tiles"
             st.rerun()
@@ -1110,7 +1276,7 @@ def main():
             st.session_state.query_input = "decorative tiles"
             st.rerun()
     
-    with col2:
+        with col2:
         if st.button("🏢 Commercial tiles", key="prompt4"):
             st.session_state.query_input = "commercial tiles"
             st.rerun()
