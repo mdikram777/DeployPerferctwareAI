@@ -24,10 +24,18 @@ load_dotenv()
 
 # Initialize models
 try:
-    llm_text = HuggingFaceHub(
-        repo_id="gpt2",
-        model_kwargs={"temperature": 0.7, "max_length": 512},
-        huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN")
+    # llm_text = HuggingFaceHub(
+    #     repo_id="gpt2",
+    #     model_kwargs={"temperature": 0.7, "max_length": 512},
+    #     huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN")
+    # )
+
+    llm_text = Groq(
+        model="llama-3.1-8b-instant",
+        groq_api_key=os.getenv("GROQ_API_KEY"),
+        temperature=0.7,
+        max_tokens=512,
+        timeout=30
     )
 except Exception as e:
     print(f"Warning: AI model unavailable: {str(e)}")
