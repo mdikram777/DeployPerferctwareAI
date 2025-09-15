@@ -15,6 +15,7 @@ from langchain_community.llms import HuggingFaceHub
 from langchain.schema.document import Document
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_groq import ChatGroq
 from unstructured.partition.pdf import partition_pdf
 from dotenv import load_dotenv
 import streamlit as st
@@ -30,7 +31,7 @@ try:
     #     huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_API_TOKEN")
     # )
 
-    llm_text = Groq(
+    llm_text = ChatGroq(
         model="llama-3.1-8b-instant",
         groq_api_key=os.getenv("GROQ_API_KEY"),
         temperature=0.7,

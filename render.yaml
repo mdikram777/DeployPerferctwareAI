@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: perfectware-ai
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run main.py --server.port=$PORT --server.address=0.0.0.0
+    envVars:
+      - key: HUGGINGFACE_API_TOKEN
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
