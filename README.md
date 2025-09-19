@@ -10,6 +10,10 @@ An intelligent product recommendation system for tiles, sanitary ware, and bathr
 - **PDF Processing**: Automatic extraction of product data from PDF catalogs
 - **Enhanced Recommendations**: Multi-factor ranking system for better results
 
+## 🚀 Live Demo
+
+[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/mdikram777/perfectware-ai)
+
 ## Local Setup
 
 1. **Clone the repository**
@@ -31,54 +35,50 @@ An intelligent product recommendation system for tiles, sanitary ware, and bathr
 
 4. **Set up environment variables**
    - Create a `.env` file in the root directory
-   - Add your Hugging Face API token:
+   - Add your API tokens:
    ```bash
-   HUGGINGFACEHUB_API_TOKEN=your_huggingface_token_here
+   HUGGINGFACE_API_TOKEN=your_huggingface_token_here
+   GROQ_API_KEY=your_groq_api_key_here
    ```
-   - Get your free token from [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
 
 5. **Run the application**
    ```bash
-   streamlit run display.py
+   streamlit run main.py
    ```
 
-## Deployment on Render
+## 🐳 Deployment on Hugging Face Spaces
 
 ### Prerequisites
 - GitHub repository with the code
-- Render account (free tier available)
+- Hugging Face account (free)
+- Docker (for local testing)
 
 ### Steps to Deploy
 
-1. **Go to [Render Dashboard](https://dashboard.render.com/)**
+1. **Go to [Hugging Face Spaces](https://huggingface.co/new-space)**
 
-2. **Create New Web Service**
-   - Click "New +" → "Web Service"
-   - Connect your GitHub account
-   - Select the repository: `DeployPerferctwareAI`
+2. **Create New Space**
+   - **Space name**: `perfectware-ai`
+   - **License**: MIT
+   - **SDK**: Docker
+   - **Hardware**: CPU Basic (free) or upgrade if needed
 
-3. **Configure the Service**
-   - **Name**: `perfectware-ai-assistant`
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `streamlit run display.py --server.port=$PORT --server.address=0.0.0.0`
-   - **Python Version**: `3.11`
+3. **Configure Environment Variables**
+   - Go to Settings → Repository secrets
+   - Add: `HUGGINGFACE_API_TOKEN` = `your_huggingface_token_here`
+   - Add: `GROQ_API_KEY` = `your_groq_api_key_here`
 
-4. **Environment Variables**
-   - In the Render dashboard, go to "Environment" tab
-   - Add: `HUGGINGFACEHUB_API_TOKEN` = `your_huggingface_token_here`
-   - Get your free token from [https://huggingface.co/settings/tokens](https://huggingface.co/settings/tokens)
+4. **Deploy**
+   - Push your code to the space repository
+   - Hugging Face will automatically build and deploy using Docker
 
-5. **Deploy**
-   - Click "Create Web Service"
-   - Render will automatically build and deploy your application
+### Important Notes for Hugging Face Spaces
 
-### Important Notes for Render
-
-- **Port Configuration**: The app uses `$PORT` environment variable (required by Render)
-- **Memory Requirements**: The app uses ML models, so consider upgrading if you hit memory limits
-- **Startup Time**: First deployment may take 5-10 minutes due to model downloads
-- **Data Persistence**: The FAISS index and extracted content are included in the repository
+- **Port**: Uses port 7860 (automatically configured)
+- **Memory**: Free tier has 16GB RAM (sufficient for this app)
+- **Storage**: 50GB persistent storage
+- **Build Time**: First deployment takes 5-10 minutes
+- **Auto-deploy**: Updates automatically when you push to main branch
 
 ## File Structure
 
