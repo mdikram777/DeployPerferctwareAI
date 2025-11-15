@@ -1,0 +1,32 @@
+# Virtual environments
+perfectware_env_311/
+venv/
+env/
+ENV/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Large files that are already in repo
+perfectware_catalogue.pdf
+
+# Output folders
+output/
+figures/
