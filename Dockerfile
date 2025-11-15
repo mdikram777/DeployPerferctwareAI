@@ -18,16 +18,17 @@ RUN pip install --no-cache-dir --user torch torchvision --index-url https://down
     pip install --no-cache-dir --user -r requirements.txt && \
     pip cache purge
 
-# Stage 2: Runtime image
+# Stage 2: Runtime image with aggressive cleanup
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install only runtime dependencies (no build tools)
+# Install only runtime dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /tmp/* /var/tmp/*
 
 # Copy Python packages from builder
 COPY --from=builder /root/.local /root/.local
@@ -35,12 +36,22 @@ COPY --from=builder /root/.local /root/.local
 # Make sure scripts in .local are usable
 ENV PATH=/root/.local/bin:$PATH
 
-# Clean up unnecessary files to reduce image size
+# Aggressive cleanup to reduce image size
 RUN find /root/.local -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && \
     find /root/.local -name "*.pyc" -delete && \
-    find /root/.local -name "*.pyo" -delete
+    find /root/.local -name "*.pyo" -delete && \
+    find /root/.local -name "*.dist-info" -type d -exec sh -c 'rm -rf "$1"/RECORD "$1"/INSTALLER 2>/dev/null || true' _ {} \; && \
+    find /root/.local -name "tests" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /root/.local -name "test" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /root/.local -name "*.md" -delete && \
+    find /root/.local -name "*.txt" -path "*/test*" -delete && \
+    find /root/.local -name "*.rst" -delete && \
+    find /root/.local -name "LICENSE*" -delete && \
+    find /root/.local -name "*.so" -exec strip {} \; 2>/dev/null || true && \
+    rm -rf /root/.cache && \
+    rm -rf /tmp/* /var/tmp/*
 
-# Copy application code
+# Copy only essential application code (exclude large files via .dockerignore)
 COPY . .
 
 # Create streamlit config
@@ -59,6 +70,11 @@ RUN mkdir -p .streamlit && \
     echo 'backgroundColor = "#FFFFFF"' >> .streamlit/config.toml && \
     echo 'secondaryBackgroundColor = "#F0F2F6"' >> .streamlit/config.toml && \
     echo 'textColor = "#262730"' >> .streamlit/config.toml
+
+# Final cleanup
+RUN rm -rf /tmp/* /var/tmp/* && \
+    find /app -name "*.pyc" -delete && \
+    find /app -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 
 # Expose port
 EXPOSE ${PORT:-7860}
