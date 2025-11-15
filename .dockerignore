@@ -65,9 +65,8 @@ render.yaml
 .env.local
 .env.production
 
-# Large files and folders
+# Large files and folders (keep figures/ - needed for RAG image display)
 perfectware_catalogue.pdf
-figures/
 output/
 *.pdf
 *.zip
