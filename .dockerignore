@@ -64,3 +64,16 @@ render.yaml
 .env
 .env.local
 .env.production
+
+# Large files and folders
+perfectware_catalogue.pdf
+figures/
+output/
+*.pdf
+*.zip
+*.tar.gz
+
+# Large data (will be mounted as Railway volumes)
+# Keep these commented if you want to include in image
+# extracted_content/
+# perfectware_products_index/
